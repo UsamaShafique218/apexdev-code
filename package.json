@@ -1,0 +1,341 @@
+{
+  "name": "apexdev-code",
+  "displayName": "ApexDev Code",
+  "description": "Autonomous AI coding agent for VS Code — plans the work, edits files, runs commands and verifies the result.",
+  "version": "0.1.0",
+  "publisher": "apexdev",
+  "author": "Usama Shafique",
+  "icon": "media/icon.png",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/UsamaShafique218/apexdev-code.git"
+  },
+  "homepage": "https://github.com/UsamaShafique218/apexdev-code#readme",
+  "bugs": {
+    "url": "https://github.com/UsamaShafique218/apexdev-code/issues"
+  },
+  "galleryBanner": {
+    "color": "#0E645C",
+    "theme": "dark"
+  },
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "AI",
+    "Chat",
+    "Machine Learning",
+    "Other"
+  ],
+  "keywords": [
+    "ai",
+    "agent",
+    "assistant",
+    "coding agent",
+    "openai",
+    "gemini",
+    "ollama",
+    "openrouter",
+    "groq",
+    "autonomous"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [],
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "apexdev",
+          "title": "ApexDev Code",
+          "icon": "media/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "apexdev": [
+        {
+          "type": "webview",
+          "id": "apexdev.chat",
+          "name": "Agent"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "apexdev.newChat",
+        "title": "New Chat",
+        "category": "ApexDev",
+        "icon": "$(add)"
+      },
+      {
+        "command": "apexdev.stop",
+        "title": "Stop Current Task",
+        "category": "ApexDev",
+        "icon": "$(debug-stop)"
+      },
+      {
+        "command": "apexdev.setApiKey",
+        "title": "Set API Key",
+        "category": "ApexDev",
+        "icon": "$(key)"
+      },
+      {
+        "command": "apexdev.clearApiKey",
+        "title": "Remove API Key",
+        "category": "ApexDev"
+      },
+      {
+        "command": "apexdev.openSettings",
+        "title": "Open Settings",
+        "category": "ApexDev",
+        "icon": "$(gear)"
+      },
+      {
+        "command": "apexdev.focus",
+        "title": "Open Agent Panel",
+        "category": "ApexDev"
+      },
+      {
+        "command": "apexdev.history",
+        "title": "Chat History",
+        "category": "ApexDev",
+        "icon": "$(history)"
+      },
+      {
+        "command": "apexdev.manageMemory",
+        "title": "Manage Memory",
+        "category": "ApexDev",
+        "icon": "$(lightbulb)"
+      },
+      {
+        "command": "apexdev.closeBrowser",
+        "title": "Close Agent Browser",
+        "category": "ApexDev"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "apexdev.newChat",
+          "when": "view == apexdev.chat",
+          "group": "navigation@1"
+        },
+        {
+          "command": "apexdev.history",
+          "when": "view == apexdev.chat",
+          "group": "navigation@2"
+        },
+        {
+          "command": "apexdev.openSettings",
+          "when": "view == apexdev.chat",
+          "group": "navigation@3"
+        },
+        {
+          "command": "apexdev.manageMemory",
+          "when": "view == apexdev.chat",
+          "group": "overflow@0"
+        },
+        {
+          "command": "apexdev.closeBrowser",
+          "when": "view == apexdev.chat",
+          "group": "overflow@3"
+        },
+        {
+          "command": "apexdev.setApiKey",
+          "when": "view == apexdev.chat",
+          "group": "overflow@1"
+        },
+        {
+          "command": "apexdev.clearApiKey",
+          "when": "view == apexdev.chat",
+          "group": "overflow@2"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "apexdev.focus",
+        "key": "ctrl+alt+a",
+        "mac": "cmd+alt+a"
+      }
+    ],
+    "configuration": {
+      "title": "ApexDev Code",
+      "properties": {
+        "apexdev.baseUrl": {
+          "type": "string",
+          "default": "https://api.openai.com/v1",
+          "markdownDescription": "Base URL of any OpenAI-compatible API (OpenAI, OpenRouter, Groq, DeepSeek, Together, LM Studio, Ollama `/v1`…). The agent calls `{baseUrl}/chat/completions`.",
+          "order": 0
+        },
+        "apexdev.model": {
+          "type": "string",
+          "default": "gpt-4o",
+          "markdownDescription": "Model ID sent to the API. It must support tool (function) calling.",
+          "order": 1
+        },
+        "apexdev.permissionMode": {
+          "type": "string",
+          "enum": [
+            "ask",
+            "autoEdit",
+            "fullAuto"
+          ],
+          "enumDescriptions": [
+            "Ask before every file change and command.",
+            "Apply file edits automatically; ask before running commands.",
+            "Run everything without asking (destructive commands still ask)."
+          ],
+          "default": "ask",
+          "order": 2
+        },
+        "apexdev.maxTokens": {
+          "type": "number",
+          "default": 0,
+          "minimum": 0,
+          "markdownDescription": "Maximum output tokens per model response. `0` lets the provider decide.",
+          "order": 3
+        },
+        "apexdev.temperature": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "default": null,
+          "minimum": 0,
+          "maximum": 2,
+          "markdownDescription": "Sampling temperature. Leave empty (`null`) to use the provider default.",
+          "order": 4
+        },
+        "apexdev.maxIterations": {
+          "type": "number",
+          "default": 60,
+          "minimum": 1,
+          "description": "Maximum model ↔ tool round trips for a single request before the agent stops.",
+          "order": 5
+        },
+        "apexdev.contextCharBudget": {
+          "type": "number",
+          "default": 400000,
+          "minimum": 20000,
+          "description": "Approximate conversation size (characters) after which old tool output is trimmed to stay inside the model's context window.",
+          "order": 6
+        },
+        "apexdev.shell": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "bash",
+            "powershell",
+            "cmd"
+          ],
+          "default": "auto",
+          "markdownDescription": "Shell used by the `run_command` tool. `auto` prefers Git Bash on Windows, then PowerShell.",
+          "order": 7
+        },
+        "apexdev.vision": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Send screenshots from browser and desktop tools to the model as images. Turn off for models without image input.",
+          "order": 8
+        },
+        "apexdev.voice.transcription": {
+          "type": "string",
+          "enum": [
+            "chat",
+            "whisper"
+          ],
+          "enumDescriptions": [
+            "Send the recording to a chat model that accepts audio input (Gemini, GPT-4o audio models).",
+            "Use an OpenAI-style /audio/transcriptions endpoint (Whisper, Groq, local whisper servers)."
+          ],
+          "default": "chat",
+          "markdownDescription": "How the microphone button turns speech into text.",
+          "order": 9
+        },
+        "apexdev.voice.model": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Model used for voice transcription. Empty uses the chat model (`chat` mode) or `whisper-1` (`whisper` mode).",
+          "order": 10
+        },
+        "apexdev.browser.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Let the agent control a Chrome/Edge window (separate profile) to open, test and use web pages.",
+          "order": 10
+        },
+        "apexdev.browser.executablePath": {
+          "type": "string",
+          "default": "",
+          "description": "Path to chrome.exe / msedge.exe / chromium. Empty = detect automatically.",
+          "order": 11
+        },
+        "apexdev.browser.headless": {
+          "type": "boolean",
+          "default": false,
+          "description": "Run the agent browser without a visible window.",
+          "order": 12
+        },
+        "apexdev.desktop.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Let the agent see the screen and operate desktop applications (Windows only). Actions still follow the permission mode.",
+          "order": 13
+        },
+        "apexdev.memory.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Let the agent remember preferences and project facts across chats.",
+          "order": 20
+        },
+        "apexdev.subAgents.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Let the agent delegate research to read-only sub-agents that run in parallel.",
+          "order": 21
+        },
+        "apexdev.subAgents.maxIterations": {
+          "type": "number",
+          "default": 30,
+          "minimum": 1,
+          "description": "Maximum tool round trips for one sub-agent.",
+          "order": 22
+        },
+        "apexdev.history.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Save chats so they can be reopened from Chat History.",
+          "order": 23
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "node esbuild.mjs",
+    "build:prod": "node esbuild.mjs --production",
+    "watch": "node esbuild.mjs --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "node esbuild.mjs --tests && node --test out-test/tools.test.js out-test/agent.test.js out-test/ide.test.js out-test/history.test.js out-test/memory.test.js out-test/browser.test.js out-test/e2e.test.js out-test/composer.test.js",
+    "test:desktop": "node esbuild.mjs --tests && node --test out-test/desktop.test.js",
+    "mock": "node scripts/mock-llm.mjs",
+    "package": "vsce package --no-dependencies",
+    "publish:vsce": "vsce publish --no-dependencies",
+    "publish:ovsx": "ovsx publish --no-dependencies",
+    "vscode:prepublish": "npm run typecheck && npm run build:prod"
+  },
+  "dependencies": {
+    "fast-glob": "^3.3.2",
+    "ws": "^8.22.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@types/vscode": "^1.90.0",
+    "@types/ws": "^8.18.2",
+    "@vscode/vsce": "^3.9.2",
+    "esbuild": "^0.24.0",
+    "ovsx": "^1.1.1",
+    "typescript": "^5.6.0"
+  }
+}

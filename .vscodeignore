@@ -1,0 +1,14 @@
+src/**
+test/**
+out-test/**
+scripts/**
+sandbox/**
+node_modules/**
+.vscode/**
+**/*.map
+**/*.ts
+tsconfig.json
+esbuild.mjs
+scripts/icon.html
+.gitignore
+*.vsix
