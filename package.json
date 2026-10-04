@@ -2,7 +2,7 @@
   "name": "apexdev-code",
   "displayName": "ApexDev Code",
   "description": "Autonomous AI coding agent for VS Code — plans the work, edits files, runs commands and verifies the result.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publisher": "apexdev",
   "author": "Usama Shafique",
   "icon": "media/icon.png",
@@ -75,6 +75,12 @@
         "icon": "$(debug-stop)"
       },
       {
+        "command": "apexdev.connect",
+        "title": "Connect a Model (Choose Provider)",
+        "category": "ApexDev",
+        "icon": "$(plug)"
+      },
+      {
         "command": "apexdev.setApiKey",
         "title": "Set API Key",
         "category": "ApexDev",
@@ -142,6 +148,11 @@
           "group": "overflow@3"
         },
         {
+          "command": "apexdev.connect",
+          "when": "view == apexdev.chat",
+          "group": "overflow@0"
+        },
+        {
           "command": "apexdev.setApiKey",
           "when": "view == apexdev.chat",
           "group": "overflow@1"
@@ -166,7 +177,7 @@
         "apexdev.baseUrl": {
           "type": "string",
           "default": "https://api.openai.com/v1",
-          "markdownDescription": "Base URL of any OpenAI-compatible API (OpenAI, OpenRouter, Groq, DeepSeek, Together, LM Studio, Ollama `/v1`…). The agent calls `{baseUrl}/chat/completions`.",
+          "markdownDescription": "Base URL of any OpenAI-compatible API (OpenAI, Gemini, OpenRouter, Groq, DeepSeek, Together, LM Studio, Ollama `/v1`…). The agent calls `{baseUrl}/chat/completions`. Easiest: run **ApexDev: Connect a Model** to pick a provider.",
           "order": 0
         },
         "apexdev.model": {

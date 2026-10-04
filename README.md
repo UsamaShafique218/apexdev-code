@@ -13,18 +13,18 @@ It works with **any OpenAI-compatible API** — OpenAI, Google Gemini, OpenRoute
 ## Get started
 
 1. Click the **ApexDev** (△) icon in the activity bar, or press `Ctrl+Alt+A` (`Cmd+Alt+A` on macOS).
-2. Click **Add API key** and paste your key. It is stored in VS Code's encrypted SecretStorage, never in settings files.
-3. Pick your provider: open the model chip in the composer → **Change provider…**, or set these in Settings (`ApexDev`):
+2. Click **Connect a model**, pick a provider and paste its API key. No key yet? The ↗ button in the key box opens the provider's key page — **Google Gemini** and **Groq** have free tiers. ApexDev sets the endpoint and picks a model your provider offers. The key is stored in VS Code's encrypted SecretStorage, never in settings files.
+3. To switch later: model chip in the composer → **Change provider…**, `/provider`, or **ApexDev: Connect a Model** in the Command Palette. Any other OpenAI-compatible API works too — set these in Settings (`ApexDev`):
 
-| Provider   | `apexdev.baseUrl`                                          | Example `apexdev.model`   |
-| ---------- | ---------------------------------------------------------- | ------------------------- |
-| OpenAI     | `https://api.openai.com/v1`                                | `gpt-4o`                  |
-| Gemini     | `https://generativelanguage.googleapis.com/v1beta/openai`  | `gemini-2.5-flash`        |
-| OpenRouter | `https://openrouter.ai/api/v1`                             | `openai/gpt-4o`           |
-| Groq       | `https://api.groq.com/openai/v1`                           | `llama-3.3-70b-versatile` |
-| DeepSeek   | `https://api.deepseek.com/v1`                              | `deepseek-chat`           |
-| LM Studio  | `http://localhost:1234/v1` (no key needed)                 | the loaded model's ID     |
-| Ollama     | `http://localhost:11434/v1` (no key needed)                | `qwen2.5-coder:14b`       |
+| Provider   | `apexdev.baseUrl`                                          | Example `apexdev.model`   | Get a key |
+| ---------- | ---------------------------------------------------------- | ------------------------- | --------- |
+| Gemini     | `https://generativelanguage.googleapis.com/v1beta/openai`  | `gemini-3.8-flash`        | [aistudio.google.com/apikey](https://aistudio.google.com/apikey) (free tier) |
+| Groq       | `https://api.groq.com/openai/v1`                           | `openai/gpt-oss-120b`     | [console.groq.com/keys](https://console.groq.com/keys) (free tier) |
+| OpenRouter | `https://openrouter.ai/api/v1`                             | `google/gemini-3.8-flash` | [openrouter.ai/keys](https://openrouter.ai/keys) |
+| OpenAI     | `https://api.openai.com/v1`                                | `gpt-5.5`                 | [platform.openai.com/api-keys](https://platform.openai.com/api-keys) |
+| DeepSeek   | `https://api.deepseek.com/v1`                              | `deepseek-chat`           | [platform.deepseek.com](https://platform.deepseek.com/api_keys) |
+| LM Studio  | `http://localhost:1234/v1`                                 | the loaded model's ID     | no key needed |
+| Ollama     | `http://localhost:11434/v1`                                | `qwen2.5-coder:14b`       | no key needed |
 
 4. Type a goal, for example *"Add a dark mode toggle to the settings page and make sure the tests still pass"*, and press Enter.
 
@@ -36,7 +36,7 @@ The model must support **tool / function calling**. The model picker lists every
 | -------------- | ----------------------------------------------------------------------------- |
 | Mode           | **Ask mode** (approve every edit and command), **Auto edits** (edits apply on their own, commands still ask) or **Auto mode** (everything runs; risky commands still ask) |
 | `@`            | Attach a file or folder from your workspace to the message                    |
-| `/`            | Commands: `/explain`, `/fix`, `/test`, `/review`, `/init`, `/new`, `/history`, `/model`, `/mode`, `/memory`, `/key`, `/settings` |
+| `/`            | Commands: `/explain`, `/fix`, `/test`, `/review`, `/init`, `/new`, `/history`, `/model`, `/mode`, `/memory`, `/provider`, `/key`, `/settings` |
 | Image          | Attach or paste screenshots and mockups (needs a vision model)                |
 | Model chip     | Search and switch models, change provider, set the API key                    |
 | Microphone     | Speak your request; it is transcribed into the input box (Windows)            |

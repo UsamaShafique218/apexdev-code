@@ -176,10 +176,10 @@
     const connect = cfg && cfg.needsKey
       ? `<div class="callout">
           <div class="callout-head">${icon('key')}<strong>Connect a model</strong></div>
-          <p>ApexDev works with any OpenAI-compatible API. Current endpoint: <code>${esc(cfg.host)}</code> · <code>${esc(cfg.model)}</code></p>
+          <p>Pick a provider and paste its API key — Google Gemini and Groq have free tiers, Ollama runs locally without one. Current endpoint: <code>${esc(cfg.host)}</code> · <code>${esc(cfg.model)}</code></p>
           <div class="actions">
-            <button type="button" class="btn primary" data-command="setApiKey">Add API key</button>
-            <button type="button" class="btn ghost" data-command="openSettings">Change provider</button>
+            <button type="button" class="btn primary" data-command="connect">Connect a model</button>
+            <button type="button" class="btn ghost" data-command="setApiKey">I have a key</button>
           </div>
         </div>`
       : '';
@@ -507,8 +507,9 @@
     closeTextSegment();
     const kind = level === 'error' ? 'alert' : level === 'warning' ? 'alert' : 'info';
     const node = el('div', `notice notice-${level}`);
+    const labels = { setApiKey: 'Set API key', connect: 'Change provider', openSettings: 'Open settings' };
     const button = action
-      ? `<button type="button" class="btn secondary" data-command="${esc(action)}">${action === 'setApiKey' ? 'Set API key' : 'Open settings'}</button>`
+      ? `<button type="button" class="btn secondary" data-command="${esc(action)}">${labels[action] || 'Open settings'}</button>`
       : '';
     node.innerHTML = `${icon(kind)}<div class="notice-body"><p>${esc(message)}</p>${button}</div>`;
     append(node, state.turn || log);
@@ -867,6 +868,7 @@
     { id: 'model', icon: 'cpu', detail: 'Switch the model', run: () => openModelMenu() },
     { id: 'mode', icon: 'shield', detail: 'Change when ApexDev asks first', run: () => openModeMenu() },
     { id: 'memory', icon: 'lightbulb', detail: 'View what ApexDev remembers', run: () => command('memory') },
+    { id: 'provider', icon: 'sliders', detail: 'Connect Gemini, OpenAI, Groq, Ollama…', run: () => command('connect') },
     { id: 'key', icon: 'key', detail: 'Set or replace the API key', run: () => command('setApiKey') },
     { id: 'settings', icon: 'sliders', detail: 'Provider, model and other settings', run: () => command('openSettings') },
   ];
@@ -961,7 +963,7 @@
     }
     if (models.error && !query) items.push({ label: models.error, icon: 'alert', disabled: true, section: 'Provider' });
     if (!query) {
-      items.push({ action: 'openSettings', label: 'Change provider…', detail: 'Base URL and other settings', icon: 'sliders', section: 'Provider' });
+      items.push({ action: 'connect', label: 'Change provider…', detail: 'Gemini, OpenAI, Groq, OpenRouter, Ollama…', icon: 'sliders', section: 'Provider' });
       items.push({ action: 'setApiKey', label: 'Set API key…', icon: 'key', section: 'Provider' });
     }
     return items;

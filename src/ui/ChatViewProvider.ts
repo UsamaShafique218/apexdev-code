@@ -34,7 +34,7 @@ type FromWebview =
   | { type: 'permissionResponse'; id: string; decision: PermissionDecision }
   | { type: 'openFile'; path: string; line?: number }
   | { type: 'openLink'; url: string }
-  | { type: 'command'; command: 'setApiKey' | 'openSettings' | 'history' | 'memory' }
+  | { type: 'command'; command: 'connect' | 'setApiKey' | 'openSettings' | 'history' | 'memory' }
   | { type: 'listFiles' }
   | { type: 'listModels' }
   | { type: 'setModel'; model: string }
@@ -291,6 +291,7 @@ export class ChatViewProvider implements vscode.WebviewViewProvider, vscode.Disp
         break;
       case 'command': {
         const commands = {
+          connect: 'apexdev.connect',
           setApiKey: 'apexdev.setApiKey',
           openSettings: 'apexdev.openSettings',
           history: 'apexdev.history',
@@ -358,8 +359,11 @@ export class ChatViewProvider implements vscode.WebviewViewProvider, vscode.Disp
       }
     } catch (err) {
       const status = err instanceof LLMError ? err.status : undefined;
-      const action = status === 401 || status === 403 ? 'setApiKey' : status === 404 || status === 400 ? 'openSettings' : undefined;
-      this.emit({ type: 'error', message: (err as Error).message ?? String(err), action });
+      const message = (err as Error).message ?? String(err);
+      // Gemini answers a bad key with 400, so look at the message as well as the status.
+      const badKey = status === 401 || status === 403 || (status === 400 && /api[ _-]?key/i.test(message));
+      const action = badKey ? 'setApiKey' : status === 404 || status === 400 ? 'connect' : undefined;
+      this.emit({ type: 'error', message, action });
     } finally {
       this.busy = false;
       this.abort = undefined;

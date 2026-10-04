@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.1 — 2026-10-04
+
+- **Connect a model:** pick Gemini, Groq, OpenRouter, OpenAI, DeepSeek, Ollama or LM Studio from a list. ApexDev sets the endpoint, asks for the key (with a link to the provider's key page) and picks a model the provider actually offers — no more editing the base URL by hand.
+- New `/provider` command and **ApexDev: Connect a Model** in the Command Palette; **Change provider…** in the model picker opens the same list.
+- A rejected API key now offers **Set API key** even when the provider answers with `400` (Gemini does).
+- Updated the suggested Gemini model to `gemini-3.8-flash`; `gemini-2.5-flash` is no longer available to new Gemini users.
+
 ## 0.1.0 — 2026-10-04
 
 First public release.

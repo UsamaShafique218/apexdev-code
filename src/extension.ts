@@ -3,6 +3,8 @@ import * as vscode from 'vscode';
 import { BrowserSession } from './browser/session';
 import { DesktopHost } from './desktop/host';
 import { ChatStore } from './history/store';
+import { listModels } from './llm/models';
+import { PROVIDERS, ProviderPreset, pickModel } from './llm/providers';
 import { MemoryStore } from './memory/store';
 import { createBrowserTools } from './tools/browser';
 import { createDesktopTools } from './tools/desktop';
@@ -66,6 +68,7 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.commands.registerCommand('apexdev.openSettings', () =>
       vscode.commands.executeCommand('workbench.action.openSettings', '@ext:apexdev.apexdev-code'),
     ),
+    vscode.commands.registerCommand('apexdev.connect', () => connectProvider(context)),
     vscode.commands.registerCommand('apexdev.setApiKey', async () => {
       const key = await vscode.window.showInputBox({
         title: 'ApexDev: API Key',
@@ -88,6 +91,89 @@ export function activate(context: vscode.ExtensionContext): void {
 export async function deactivate(): Promise<void> {
   await cleanup?.();
   cleanup = undefined;
+}
+
+/** Provider picker: sets the base URL, asks for the key and chooses a model the provider actually offers. */
+async function connectProvider(context: vscode.ExtensionContext): Promise<void> {
+  type Item = vscode.QuickPickItem & { preset?: ProviderPreset };
+  const current = config().get<string>('baseUrl', '').replace(/\/+$/, '');
+  const items: Item[] = [
+    ...PROVIDERS.map((p) => ({
+      label: p.label,
+      description: p.baseUrl === current ? `${p.detail} · current` : p.detail,
+      preset: p,
+    })),
+    { label: 'Other OpenAI-compatible API…', description: 'Enter the base URL and model in Settings' },
+  ];
+  const picked = await vscode.window.showQuickPick(items, {
+    title: 'ApexDev: Connect a model',
+    placeHolder: 'Choose your AI provider',
+  });
+  if (!picked) return;
+  const preset = picked.preset;
+  if (!preset) {
+    await vscode.commands.executeCommand('apexdev.openSettings');
+    return;
+  }
+
+  let apiKey = await context.secrets.get(API_KEY_SECRET);
+  if (preset.keyUrl) {
+    const entered = await askForKey(preset, Boolean(apiKey));
+    if (entered === undefined) return;
+    if (entered) apiKey = entered;
+  }
+
+  await config().update('baseUrl', preset.baseUrl, vscode.ConfigurationTarget.Global);
+  if (preset.keyUrl && apiKey) await context.secrets.store(API_KEY_SECRET, apiKey);
+
+  let available: string[] = [];
+  let failure: string | undefined;
+  try {
+    available = await listModels(preset.baseUrl, preset.keyUrl ? apiKey : undefined, AbortSignal.timeout(10_000));
+  } catch (err) {
+    failure = (err as Error).message;
+  }
+  const model = pickModel(preset, available);
+  if (model) await config().update('model', model, vscode.ConfigurationTarget.Global);
+
+  if (failure) {
+    const hint = preset.keyUrl ? 'Check the API key' : `Make sure ${preset.label} is running`;
+    void vscode.window.showWarningMessage(`ApexDev: switched to ${preset.label}, but its model list could not be loaded (${failure}). ${hint}.`);
+  } else {
+    void vscode.window.showInformationMessage(`ApexDev: connected to ${preset.label}${model ? ` · ${model}` : ''}.`);
+  }
+}
+
+/** Resolves to the trimmed key, '' to keep the saved one, or undefined when cancelled. */
+function askForKey(preset: ProviderPreset, hasKey: boolean): Promise<string | undefined> {
+  const input = vscode.window.createInputBox();
+  const getKey: vscode.QuickInputButton = { iconPath: new vscode.ThemeIcon('link-external'), tooltip: `Get a ${preset.label} key` };
+  input.title = `ApexDev: ${preset.label} API key`;
+  input.prompt = `Paste your ${preset.label} API key — no key yet? Use the ↗ button above to create one. Stored in VS Code’s encrypted secret storage.`;
+  input.placeholder = hasKey ? 'Leave empty to keep the saved key' : 'API key';
+  input.password = true;
+  input.ignoreFocusOut = true;
+  input.buttons = [getKey];
+  return new Promise((resolve) => {
+    let done = false;
+    input.onDidTriggerButton(() => void vscode.env.openExternal(vscode.Uri.parse(preset.keyUrl!)));
+    input.onDidChangeValue(() => (input.validationMessage = undefined));
+    input.onDidAccept(() => {
+      const value = input.value.trim();
+      if (!value && !hasKey) {
+        input.validationMessage = 'Enter a key';
+        return;
+      }
+      done = true;
+      resolve(value);
+      input.hide();
+    });
+    input.onDidHide(() => {
+      if (!done) resolve(undefined);
+      input.dispose();
+    });
+    input.show();
+  });
 }
 
 async function manageMemory(memory: MemoryStore): Promise<void> {

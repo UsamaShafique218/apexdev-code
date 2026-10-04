@@ -4,6 +4,7 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 import { after, afterEach, before, describe, it } from 'node:test';
 import { parseModelList } from '../src/llm/models';
+import { PROVIDERS, pickModel } from '../src/llm/providers';
 import { expandMentions, findMentions } from '../src/ui/mentions';
 import { cleanTranscript, normalizeWav, transcribe } from '../src/voice/transcribe';
 
@@ -24,6 +25,32 @@ describe('parseModelList', () => {
     assert.deepEqual(parseModelList({ models: ['llama3', 'qwen2.5-coder'] }), ['llama3', 'qwen2.5-coder']);
     assert.deepEqual(parseModelList(null), []);
     assert.deepEqual(parseModelList({ data: 'nope' }), []);
+  });
+});
+
+describe('pickModel', () => {
+  const preset = (id: string) => PROVIDERS.find((p) => p.id === id)!;
+
+  it('keeps the suggested model when it is listed or the list is unavailable', () => {
+    assert.equal(pickModel(preset('gemini'), ['gemini-3.8-flash', 'gemini-3.9-flash']), 'gemini-3.8-flash');
+    assert.equal(pickModel(preset('gemini'), []), 'gemini-3.8-flash');
+  });
+
+  it('falls back to the newest preferred model when the suggestion is gone', () => {
+    const listed = ['gemini-3.10-flash', 'gemini-3.9-flash', 'gemini-3.9-flash-lite', 'gemini-3.9-pro'];
+    assert.equal(pickModel(preset('gemini'), listed), 'gemini-3.10-flash');
+  });
+
+  it('uses an installed model for local servers', () => {
+    assert.equal(pickModel(preset('ollama'), ['llama3.2', 'mistral']), 'llama3.2');
+    assert.equal(pickModel(preset('lmstudio'), []), '');
+  });
+
+  it('every preset with a key has a key page and an https endpoint', () => {
+    for (const p of PROVIDERS.filter((p) => p.keyUrl)) {
+      assert.match(p.baseUrl, /^https:\/\//, p.id);
+      assert.match(p.keyUrl!, /^https:\/\//, p.id);
+    }
   });
 });
 
